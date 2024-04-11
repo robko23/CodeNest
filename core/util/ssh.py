@@ -4,13 +4,18 @@ import tempfile
 
 
 def get_pubkey_fingerprint(pubkey: str) -> str | None:
-    # 3072 SHA256:DbE7JnXrfOL+MNjVk7QD8wUJ1z33MjoLkU53nZ+tD0M robko@robko-ntb (RSA)
-    # ssh-keygen -lf test_key.pub
+    """
+    Turns this "ssh-rsa AAAAB3N... user@computer"
+    Into "SHA256:DbE7JnXrfOL+MNjVk7QD8wUJ1z33MjoLkU53nZ+tD0M"
+    :param pubkey: Public SSH key
+    :return: Fingerprint of given public key
+    """
     (_fd, path) = tempfile.mkstemp()
     with open(path, mode="w") as f:
         f.write(pubkey)
         f.flush()
-    # Run ssh-keygen command to get the fingerprint
+    # 3072 SHA256:DbE7JnXrfOL+MNjVk7QD8wUJ1z33MjoLkU53nZ+tD0M robko@robko-ntb (RSA)
+    # ssh-keygen -lf test_key.pub
     process = subprocess.Popen(
         ['ssh-keygen', '-lf', path],
         stdout=subprocess.PIPE,
