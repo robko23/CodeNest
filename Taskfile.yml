@@ -22,6 +22,6 @@ tasks:
         cmds:
             - docker exec -it code-nest bash
 
-    make-test-keyu:
+    make-test-keys:
         cmds:
             - ssh-keygen -t rsa -f test-key
