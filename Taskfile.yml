@@ -1,0 +1,27 @@
+# https://taskfile.dev
+
+version: '3'
+
+tasks:
+    build:
+        cmds:
+            - docker buildx build -t code-nest --load .
+
+    dev-bash:
+        deps:
+            - build
+        cmds:
+            - docker run --rm -it -v ./data:/app/data --entrypoint bash code-nest
+    run:
+        deps:
+            - build
+        cmds:
+            - docker run --name code-nest --rm -p 2222:22 -p 8000:8000 -it -v ./data:/app/data code-nest
+
+    attach:
+        cmds:
+            - docker exec -it code-nest bash
+
+    make-test-keyu:
+        cmds:
+            - ssh-keygen -t rsa -f test-key

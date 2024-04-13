@@ -1,0 +1,2 @@
+#!/bin/sh
+python -m core.bg.git_update_hook

@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>New ssh key</title>
+</head>
+<body>
+<form action="{% url 'new_ssh_key' %}" method="post">
+    {% if invalid_key %}
+        <p style="color: red">Invalid RSA public key</p>
+    {% endif %}
+    {% csrf_token %}
+    {{ form }}
+    <input type="submit" value="Submit">
+</form>
+</body>
+</html>

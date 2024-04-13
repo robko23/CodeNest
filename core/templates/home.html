@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Home</title>
+</head>
+<body>
+<h1>SSH key</h1>
+{% for ssh_key in ssh_keys %}
+    <p>{{ ssh_key.name }} ( {{ ssh_key.fingerprint }} )</p>
+{% endfor %}
+<a href="{% url 'new_ssh_key' %}">
+    <button>Add ssh key</button>
+</a>
+<hr/>
+
+<h1>Repos</h1>
+{% for repo in repos %}
+    <p>{{ repo.name }}</p>
+{% endfor %}
+<a href="{% url 'new_repo' %}">
+    <button>Add repo</button>
+</a>
+</body>
+</html>
