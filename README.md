@@ -19,7 +19,6 @@ Once you have installed those two things, running is as simple as `task run`
 - [ ] dev container (git hooks depend on openssh, so we need a way to run `manage.py runserver`
   inside the container with openssh-server running to test things)
 - [ ] repo deletion
-- [ ] ssh key deletion
 - [ ] nicer ui + homepage
 - [ ] registration/forgot password and other django login pages
 - [ ] issues
