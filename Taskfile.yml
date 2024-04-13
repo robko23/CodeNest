@@ -18,6 +18,19 @@ tasks:
         cmds:
             - docker run --name code-nest --rm -p 2222:22 -p 8000:8000 -it -v ./data:/app/data code-nest
 
+    run-dev:
+        cmds:
+            - docker buildx build -t code-nest-dev --target dev-runner --load .
+            - docker run 
+                --name code-nest-dev
+                --rm
+                -p 2222:22
+                -p 8000:8000
+                -it
+                -v .:/app
+                -v ./data:/home/git
+                code-nest-dev
+
     attach:
         cmds:
             - docker exec -it code-nest bash

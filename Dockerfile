@@ -22,7 +22,7 @@ COPY --link . .
 
 RUN python manage.py collectstatic
 
-FROM base as runner
+FROM base as base-runner
 
 WORKDIR /app
 
@@ -31,12 +31,21 @@ COPY --link docker/etc/ssh/sshd_config /etc/ssh/sshd_config
 COPY --link docker/django-entrypoint.sh /django-entrypoint.sh
 COPY --link docker/git-hooks /git-hooks
 
-COPY --link --from=python-packages /app /app
 COPY --link --from=python-packages /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
 
 ENV PYTHONPATH=/app
-ENV DJANGO_SETTINGS_MODULE=code-nest.settings.container
-
 EXPOSE 2222
+EXPOSE 8000
 
 ENTRYPOINT ["supervisord", "-c", "/etc/supervisord.conf"]
+
+FROM base-runner as dev-runner
+
+ENV DEVCONTAINER=true
+ENV DJANGO_SETTINGS_MODULE=code-nest.settings.devcontainer
+
+FROM base-runner as runner
+
+COPY --link --from=python-packages /app /app
+
+ENV DJANGO_SETTINGS_MODULE=code-nest.settings.container

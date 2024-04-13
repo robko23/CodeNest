@@ -7,7 +7,7 @@ import django
 django.setup()
 
 if __name__ == '__main__':
-    from core.models import Profile
+    from django.contrib.auth.models import User
     from core.models import Repository
     from core.models import SSHKey
     from django.core.cache import cache
@@ -26,9 +26,9 @@ if __name__ == '__main__':
 
     # SSH_CLIENT=172.17.0.1 58146 22
     ssh_info = os.getenv("SSH_CLIENT")
-    [remote_ip, port] = ssh_info.split(" ")
+    [remote_ip, remote_port, _server_port] = ssh_info.split(" ")
 
-    used_ssh_key: SSHKey | None = cache.get(f"{remote_ip}:{port}")
+    used_ssh_key: SSHKey | None = cache.get(f"{remote_ip}:{remote_port}")
     if not used_ssh_key:
         print("Permission denied (no connection log)", file=sys.stderr)
         exit(1)
@@ -39,8 +39,8 @@ if __name__ == '__main__':
         exit(1)
 
     try:
-        profile = Profile.objects.get(user=used_ssh_key.owner, slug__exact=user)
+        profile = User.objects.get(user=used_ssh_key.owner, username__exact=user)
         repo = Repository.objects.get(owner=used_ssh_key.owner, slug__exact=reponame)
-    except (Profile.DoesNotExist, Repository.DoesNotExist):
+    except (User.DoesNotExist, Repository.DoesNotExist):
         print("Permission denied", file=sys.stderr)
         exit(1)
