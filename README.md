@@ -20,11 +20,11 @@ To run `manage.py runserver` and develop inside the container, just run `task ru
 - [x] ssh keys creation
 - [x] dev container (git hooks depend on openssh, so we need a way to run `manage.py runserver`
   inside the container with openssh-server running to test things)
-- [ ] fix git hooks creation
-- [ ] fix push authentication - we need env vars for django to work + we are using in-memory cache,
-  use memcached or redis?
-- [ ] repo deletion
-- [ ] nicer ui + homepage
-- [ ] registration/forgot password and other django login pages
+- [ ] [fix git hooks creation](https://github.com/robko23/CodeNest/issues/1)
+- [ ] [fix push authentication - we need env vars for django to work + we are using in-memory cache,
+  use memcached or redis?](https://github.com/robko23/CodeNest/issues/2)
+- [ ] [repo deletion](https://github.com/robko23/CodeNest/issues/3)
+- [ ] [nicer ui + homepage](https://github.com/robko23/CodeNest/issues/4)
+- [ ] [registration/forgot password and other django login pages](https://github.com/robko23/CodeNest/issues/5)
 - [ ] issues
 - [ ] commit-issue linking?
