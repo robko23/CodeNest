@@ -33,13 +33,13 @@ if __name__ == '__main__':
         print("Permission denied (no connection log)", file=sys.stderr)
         exit(1)
 
-    [user, reponame] = git_repo.split("/")
-    if user is None or reponame is None:
+    [username, reponame] = git_repo.split("/")
+    if username is None or reponame is None:
         print("Permission denied (invalid path)", file=sys.stderr)
         exit(1)
 
     try:
-        profile = User.objects.get(user=used_ssh_key.owner, username__exact=user)
+        profile = User.objects.get(pk=used_ssh_key.owner.pk, username__exact=username)
         repo = Repository.objects.get(owner=used_ssh_key.owner, slug__exact=reponame)
     except (User.DoesNotExist, Repository.DoesNotExist):
         print("Permission denied", file=sys.stderr)

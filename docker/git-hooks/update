@@ -1,2 +1,4 @@
 #!/bin/sh
-PYTHONPATH=/app DJANGO_SETTINGS_MODULE=code-nest.settings.devcontainer python -m core.bg.git_update_hook $1 $2 $3
+# Load dumped env from django-entrypoint.sh
+export $(xargs </tmp/env)
+python -m core.bg.git_update_hook $1 $2 $3

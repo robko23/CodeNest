@@ -7,7 +7,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 RUN adduser git && \
     apt update && \
-    apt install -y openssh-server supervisor && \
+    apt install -y openssh-server supervisor memcached && \
     mkdir /run/sshd
 
 FROM ${PYTHON_IMAGE_NAME}:${PYTHON_IMAGE_VERSION} as python-packages
