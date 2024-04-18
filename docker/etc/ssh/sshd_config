@@ -120,3 +120,6 @@ Subsystem	sftp	/usr/lib/openssh/sftp-server
 #	AllowTcpForwarding no
 #	PermitTTY no
 #	ForceCommand cvs server
+
+Match User git
+    ForceCommand /ssh_client_wrapper.sh

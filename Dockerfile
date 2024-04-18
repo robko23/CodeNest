@@ -30,6 +30,7 @@ COPY --link docker/etc/supervisord.conf /etc/supervisord.conf
 COPY --link docker/etc/ssh/sshd_config /etc/ssh/sshd_config
 COPY --link docker/django-entrypoint.sh /django-entrypoint.sh
 COPY --link docker/git-hooks /git-hooks
+COPY --link docker/ssh_client_wrapper.sh /ssh_client_wrapper.sh
 
 COPY --link --from=python-packages /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
 
