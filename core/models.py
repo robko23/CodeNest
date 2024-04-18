@@ -7,6 +7,7 @@ class Repository(models.Model):
     name = models.CharField(max_length=50, null=False, blank=False)
     description = models.CharField(max_length=500, null=True, blank=True)
     slug = models.CharField(max_length=30, null=False, blank=False)
+    collaborators = models.ManyToManyField(User, related_name="collaborators")
 
     def __str__(self):
         return f"{self.name} ( {self.owner.username}/{self.slug} )"
@@ -24,5 +25,5 @@ class SSHKey(models.Model):
 
 # this needs to be at the bottom of the file, because it would create circular import error.
 # we need to import this to register the signals
-# noinspection PyUnresolvedReferences
+# noinspection all
 import core.signals

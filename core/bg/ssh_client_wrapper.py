@@ -5,6 +5,7 @@ import sys
 import time
 
 import django
+from django.db.models import Q
 
 django.setup()
 
@@ -16,7 +17,6 @@ ALLOWED_COMMANDS = [
 
 if __name__ == '__main__':
     from django.core.cache import cache
-    from django.contrib.auth.models import User
 
     from core.models import Repository
 
@@ -38,7 +38,7 @@ if __name__ == '__main__':
         exit(1)
 
     repo = args[1]
-    [username, reponame] = repo.split("/")
+    [namespace, reponame] = repo.split("/")
 
     ssh_info = os.getenv("SSH_CLIENT")
     [remote_ip, remote_port, _server_port] = ssh_info.split(" ")
@@ -59,11 +59,19 @@ if __name__ == '__main__':
         print("Permission denied (no connection log)", file=sys.stderr)
         exit(1)
 
-    try:
-        profile = User.objects.get(pk=used_ssh_key.owner.pk, username__exact=username)
-        repo = Repository.objects.get(owner=used_ssh_key.owner, slug__exact=reponame)
-    except (User.DoesNotExist, Repository.DoesNotExist):
-        print("Permission denied (repo not found or user does not have access)", file=sys.stderr)
+    user = used_ssh_key.owner
+
+    repository = Repository.objects.filter(
+        slug__exact=reponame, owner__username__exact=namespace
+    ).filter(
+        Q(owner=user) | Q(collaborators__in=[user])
+    )
+
+    if len(repository) == 0:
+        print("Permission denied (user does not have access to repository)", file=sys.stderr)
+        exit(1)
+    if len(repository) > 1:
+        print("Query returned more than one repository, wtf?", file=sys.stderr)
         exit(1)
 
     subprocess.run(args)

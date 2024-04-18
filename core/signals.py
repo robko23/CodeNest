@@ -43,7 +43,11 @@ def ssh_key_post_delete(sender, **kwargs):
 @receiver(pre_save, sender=User)
 def user_pre_save(sender, **kwargs):
     instance = kwargs['instance']
-    user = User.objects.get(pk=instance.pk)
+    try:
+        user = User.objects.get(pk=instance.pk)
+    except User.DoesNotExist:
+        # No change, probably adding user
+        return
     prev_username = user.username
     new_username = instance.username
 
