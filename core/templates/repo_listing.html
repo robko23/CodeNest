@@ -5,18 +5,15 @@
     <title>{{ namespace }}/{{ slug }} - {{ path }}</title>
 </head>
 <body>
+{# TODO: @MoonSoD zkus to nejak lepe vymyslet aby nebyl 2x stejny kod v jinych souborech (repo_overview.html) #}
+<a href="{{ back_url }}">
+    <button>
+        Up
+    </button>
+</a>
 {% if ty == "dir" %}
     <h1>Listing of /{{ path }}</h1>
     <ul>
-        {% for file in obj.files %}
-            {% with path|add:"/"|add:file.name as file_path %}
-                <li><a
-                        href="{% url 'repo_listing' namespace=namespace slug=slug commit_hash=commit_hash path=file_path %}"
-                >
-                    {{ file.name }}
-                </a></li>
-            {% endwith %}
-        {% endfor %}
         {% for dir in obj.dirs %}
             {% with path|add:"/"|add:dir.name as dir_path %}
                 <li><a
@@ -26,12 +23,26 @@
                 </a></li>
             {% endwith %}
         {% endfor %}
+        {% for file in obj.files %}
+            {% with path|add:"/"|add:file.name as file_path %}
+                <li><a
+                        href="{% url 'repo_listing' namespace=namespace slug=slug commit_hash=commit_hash path=file_path %}"
+                >
+                    {{ file.name }}
+                </a></li>
+            {% endwith %}
+        {% endfor %}
     </ul>
 {% elif ty == "file" %}
     <h1>Contents of /{{ path }}</h1>
-    <code>
-        {{ obj|linebreaksbr }}
-    </code>
+    {% load filters %}
+    {{ obj.ext }}
+    {% autoescape off %}
+        <pre>
+        {{ obj.contents|highlight_code:obj.filename }}
+    </pre>
+    {% endautoescape %}
+
 {% else %}
     invalid state
 {% endif %}

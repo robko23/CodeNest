@@ -1,6 +1,5 @@
 # Create your views here.
 import logging
-import os.path
 
 import git.objects
 from django.contrib.auth.decorators import login_required
@@ -65,12 +64,17 @@ def repo_overview(request, namespace: str, slug: str, branch_name: str = None):
         for b in branches:
             if b.name == branch_name:
                 branch = b
+        if not branch:
+            raise Http404(f"Branch {branch_name} does not exist in repo {namespace}/{slug}")
     else:
         for b in branches:
             if b.name in ('main', 'master', 'trunk'):
                 branch = b
-    if not branch:
-        raise Http404(f"Branch {branch_name} does not exist in repo {namespace}/{slug}")
+        if not branch:
+            return render(request, "repo_empty.html", {
+                "namespace": namespace,
+                "slug": slug
+            })
 
     files: list[git.objects.Blob] = list()
     dirs: list[git.objects.Tree] = list()
@@ -120,22 +124,45 @@ def repo_listing(request, namespace: str, slug: str, commit_hash: str, path: str
                 files.append(o)
         o = {
             "files": files,
-            "dirs": dirs
+            "dirs":  dirs
         }
     elif type(obj) == git.objects.Blob:
         ty = "file"
-        o = obj.data_stream.read().decode('UTF-8')
+        if "/" in path:
+            [_, filename] = path.rsplit("/", 1)
+        else:
+            filename = path
+        o = {
+            "contents": obj.data_stream.read().decode('UTF-8'),
+            "filename": filename
+        }
     else:
         ty = "invalid"
         o = "invalid"
+    if "/" in path:
+        [base, _file] = path.rsplit("/", 1)
+        kwargs = {
+            "namespace": namespace,
+            "slug":      slug,
+            "commit_hash": commit_hash,
+            "path": base
+        }
+        back_url = reverse("repo_listing", kwargs=kwargs)
+    else:
+        kwargs = {
+            "namespace": namespace,
+            "slug":      slug,
+        }
+        back_url = reverse("repo_overview", kwargs=kwargs)
 
     return render(request, "repo_listing.html", {
-        "namespace":      db_repository.owner.username,
-        "slug":           db_repository.slug,
-        "path": path,
+        "namespace":   db_repository.owner.username,
+        "slug":        db_repository.slug,
+        "path":        path,
         "commit_hash": commit_hash,
-        "ty": ty,
-        "obj": o
+        "ty":          ty,
+        "obj":         o,
+        "back_url":    back_url
     })
 
 
