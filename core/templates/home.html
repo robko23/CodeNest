@@ -16,7 +16,11 @@
 
 <h1>Repos</h1>
 {% for repo in repos %}
-    <p>{{ repo.name }}</p>
+    <p>
+        <a href="{% url 'repo_overview' repo.owner.username repo.slug %}">
+            {{ repo.name }}
+        </a>
+    </p>
 {% endfor %}
 <a href="{% url 'new_repo' %}">
     <button>Add repo</button>

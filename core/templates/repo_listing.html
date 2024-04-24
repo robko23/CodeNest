@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ namespace }}/{{ slug }} - {{ path }}</title>
+</head>
+<body>
+{% if ty == "dir" %}
+    <h1>Listing of /{{ path }}</h1>
+    <ul>
+        {% for file in obj.files %}
+            {% with path|add:"/"|add:file.name as file_path %}
+                <li><a
+                        href="{% url 'repo_listing' namespace=namespace slug=slug commit_hash=commit_hash path=file_path %}"
+                >
+                    {{ file.name }}
+                </a></li>
+            {% endwith %}
+        {% endfor %}
+        {% for dir in obj.dirs %}
+            {% with path|add:"/"|add:dir.name as dir_path %}
+                <li><a
+                        href="{% url 'repo_listing' namespace=namespace slug=slug commit_hash=commit_hash path=dir_path %}"
+                >
+                    [D] {{ dir.name }}
+                </a></li>
+            {% endwith %}
+        {% endfor %}
+    </ul>
+{% elif ty == "file" %}
+    <h1>Contents of /{{ path }}</h1>
+    <code>
+        {{ obj|linebreaksbr }}
+    </code>
+{% else %}
+    invalid state
+{% endif %}
+</body>
+</html>

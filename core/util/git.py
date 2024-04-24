@@ -4,8 +4,12 @@ import subprocess
 from django.conf import settings
 
 
+def get_git_repo_absolute_path(path: str) -> str:
+    return settings.DATA_DIR / path
+
+
 def create_git_repo(path: str):
-    absolute_path = settings.DATA_DIR / path
+    absolute_path = get_git_repo_absolute_path(path)
 
     # only for quicker development
     subprocess.run(['rm', '-rf', absolute_path])
