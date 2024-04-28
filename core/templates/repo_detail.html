@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% block head %}
+    <title>{{ namespace }}/{{ slug }}</title>
+{% endblock %}
+
+{% block content %}
+    <h1>Index of {{ namespace }}/{{ slug }}</h1>
+    {% include 'fragments/repo_detail/branch-list.html' %}
+    {% include 'fragments/repo_detail/listing.html' %}
+{% endblock %}

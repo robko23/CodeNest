@@ -1,0 +1,9 @@
+{
+  "name": "CodeNest",
+  "web-types": "./htmx.web-types.json",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:robko23/CodeNest.git",
+  "author": "Robin Ilyk <contact@robko.cz>",
+  "license": "MIT"
+}

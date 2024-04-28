@@ -1,0 +1,23 @@
+<div id="ssh-keys-list">
+    <h1>SSH key</h1>
+    {% for ssh_key in ssh_keys %}
+        <div style="display: flex; flex-direction: row; gap: 1em">
+            {{ ssh_key.name }} ( {{ ssh_key.fingerprint }} )
+            <form
+                    hx-post="{% url 'home' %}"
+                    hx-target="#ssh-keys-list"
+                    hx-swap="outerHTML"
+                    hx-confirm="Do you really want to remove ssh key {{ ssh_key.name }}?">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="delete"/>
+                <input type="hidden" name="object" value="ssh_key"/>
+                <input type="hidden" name="target"
+                       value="{{ ssh_key.pk }}"/>
+                <button type="submit">Delete</button>
+            </form>
+        </div>
+    {% endfor %}
+    <a href="{% url 'new_ssh_key' %}">
+        <button>Add ssh key</button>
+    </a>
+</div>

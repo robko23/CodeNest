@@ -1,0 +1,19 @@
+<div id="listing">
+    <h2>Listing of /</h2>
+    <ul>
+        {% for dir in dirs %}
+            <li><a
+                    href="{% url 'repo_listing' namespace=namespace slug=slug ref=current_branch.commit.hexsha path=dir.name %}"
+            >
+                [D] {{ dir.name }}
+            </a></li>
+        {% endfor %}
+        {% for file in files %}
+            <li><a
+                    href="{% url 'repo_listing' namespace=namespace slug=slug ref=current_branch.commit.hexsha path=file.name %}"
+            >
+                {{ file.name }}
+            </a></li>
+        {% endfor %}
+    </ul>
+</div>

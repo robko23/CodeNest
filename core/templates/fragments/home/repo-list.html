@@ -1,0 +1,26 @@
+<div id="repo-list">
+    <h1>Repos</h1>
+    {% for repo in repos %}
+        <div style="display: flex; flex-direction: row; gap: 1em">
+            <a href="{% url 'repo_detail' namespace=repo.owner.username slug=repo.slug %}">
+                {{ repo.name }}
+            </a>
+            <form
+                    hx-post="{% url 'home' %}"
+                    hx-target="#repo-list"
+                    hx-swap="outerHTML"
+                    hx-confirm="Do you really want to remove repository {{ repo.owner.username }}/{{ repo.slug }}?">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="delete"/>
+                <input type="hidden" name="object" value="repository"/>
+                <input type="hidden" name="target"
+                       value="{{ repo.slug }}"/>
+                <button type="submit">Delete</button>
+            </form>
+        </div>
+    {% endfor %}
+
+    <a href="{% url 'new_repo' %}">
+        <button>Add repo</button>
+    </a>
+</div>

@@ -49,7 +49,7 @@ And finally you can push with `git push origin main`
 - [x] [fix git hooks creation](https://github.com/robko23/CodeNest/issues/1)
 - [x] [fix push authentication - we need env vars for django to work + we are using in-memory cache,
   use memcached or redis?](https://github.com/robko23/CodeNest/issues/2)
-- [ ] [repo deletion](https://github.com/robko23/CodeNest/issues/3)
+- [x] [repo deletion](https://github.com/robko23/CodeNest/issues/3)
 - [ ] [nicer ui + homepage](https://github.com/robko23/CodeNest/issues/4)
 - [ ] [registration/forgot password and other django login pages](https://github.com/robko23/CodeNest/issues/5)
 - [ ] issues

@@ -5,7 +5,7 @@
     <title>{{ namespace }}/{{ slug }} - {{ path }}</title>
 </head>
 <body>
-{# TODO: @MoonSoD zkus to nejak lepe vymyslet aby nebyl 2x stejny kod v jinych souborech (repo_overview.html) #}
+{# TODO: @MoonSoD zkus to nejak lepe vymyslet aby nebyl 2x stejny kod v jinych souborech (repo_detail.html) #}
 <a href="{{ back_url }}">
     <button>
         Up
@@ -17,7 +17,7 @@
         {% for dir in obj.dirs %}
             {% with path|add:"/"|add:dir.name as dir_path %}
                 <li><a
-                        href="{% url 'repo_listing' namespace=namespace slug=slug commit_hash=commit_hash path=dir_path %}"
+                        href="{% url 'repo_listing' namespace=namespace slug=slug ref=ref path=dir_path %}"
                 >
                     [D] {{ dir.name }}
                 </a></li>
@@ -26,7 +26,7 @@
         {% for file in obj.files %}
             {% with path|add:"/"|add:file.name as file_path %}
                 <li><a
-                        href="{% url 'repo_listing' namespace=namespace slug=slug commit_hash=commit_hash path=file_path %}"
+                        href="{% url 'repo_listing' namespace=namespace slug=slug ref=ref path=file_path %}"
                 >
                     {{ file.name }}
                 </a></li>

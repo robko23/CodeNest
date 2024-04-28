@@ -1,5 +1,6 @@
 # Create your views here.
 import logging
+import shutil
 
 import git.objects
 from django.contrib.auth.decorators import login_required
@@ -23,28 +24,36 @@ from git import Repo
 
 
 @login_required
-def home(request: WSGIRequest):
-    # tree = repo.head.commit.tree
+def home(request):
+    repos = Repository.objects.filter(Q(owner=request.user) | Q(collaborators__in=[request.user]))
     ssh_keys = SSHKey.objects.filter(owner=request.user)
-    repos = Repository.objects.filter(owner=request.user)
-    # a = tree.traverse(depth=1)
-    # for o in a:
-    #     if type(o) == git.objects.Tree:
-    #         log.warning(f"dir: {o.path}")
-    #         for f in o.traverse(depth=1):
-    #             log.warning(f"dir: {o.path}/{f.path.lstrip(o.path + '/')}")
-    #     else:
-    #         log.warning(f"file: {o.path}")
-    #     pass
+    if request.method == "POST" and request.htmx:
+        action = request.POST.get("action")
+        object = request.POST.get("object")
+        target = request.POST.get("target")
+        if action == "delete" and object == "repository":
+            repo = Repository.objects.get(owner=request.user, slug=target)
+            repo.delete()
+            shutil.rmtree(get_git_repo_absolute_path(f"{repo.owner.username}/{repo.slug}"))
+            return render(request, "fragments/home/repo-list.html", {
+                "repos": repos
+            })
+            pass
+        elif action == "delete" and object == "ssh_key":
+            ssh_key = SSHKey.objects.get(pk=target, owner=request.user)
+            ssh_key.delete()
+            return render(request, "fragments/home/ssh_keys.html", {
+                "ssh_keys": ssh_keys
+            })
+        pass
     return render(request, "home.html", {
         'ssh_keys': ssh_keys,
         'repos':    repos,
-        # "tree":     tree.traverse(),
     })
 
 
 @login_required
-def repo_overview(request, namespace: str, slug: str, branch_name: str = None):
+def repo_detail(request, namespace: str, slug: str, branch_name: str = None):
     try:
         db_repository = Repository.objects.filter(
             slug__exact=slug, owner__username__exact=namespace
@@ -73,7 +82,7 @@ def repo_overview(request, namespace: str, slug: str, branch_name: str = None):
         if not branch:
             return render(request, "repo_empty.html", {
                 "namespace": namespace,
-                "slug": slug
+                "slug":      slug
             })
 
     files: list[git.objects.Blob] = list()
@@ -84,7 +93,7 @@ def repo_overview(request, namespace: str, slug: str, branch_name: str = None):
         elif type(o) == git.objects.Blob:
             files.append(o)
 
-    return render(request, "repo_overview.html", {
+    return render(request, "repo_detail.html", {
         "namespace":      db_repository.owner.username,
         "slug":           db_repository.slug,
         "branches":       branches,
@@ -95,7 +104,7 @@ def repo_overview(request, namespace: str, slug: str, branch_name: str = None):
 
 
 @login_required
-def repo_listing(request, namespace: str, slug: str, commit_hash: str, path: str):
+def repo_listing(request, namespace: str, slug: str, ref: str, path: str):
     try:
         db_repository = Repository.objects.filter(
             slug__exact=slug, owner__username__exact=namespace
@@ -107,7 +116,7 @@ def repo_listing(request, namespace: str, slug: str, commit_hash: str, path: str
 
     repo_path = get_git_repo_absolute_path(f"{namespace}/{slug}")
     repo = Repo(repo_path)
-    commit = repo.commit(commit_hash)
+    commit = repo.commit(ref)
     try:
         obj = commit.tree.join(path)
     except KeyError:
@@ -142,10 +151,10 @@ def repo_listing(request, namespace: str, slug: str, commit_hash: str, path: str
     if "/" in path:
         [base, _file] = path.rsplit("/", 1)
         kwargs = {
-            "namespace": namespace,
-            "slug":      slug,
-            "commit_hash": commit_hash,
-            "path": base
+            "namespace":   namespace,
+            "slug":        slug,
+            "ref": ref,
+            "path":        base
         }
         back_url = reverse("repo_listing", kwargs=kwargs)
     else:
@@ -153,13 +162,13 @@ def repo_listing(request, namespace: str, slug: str, commit_hash: str, path: str
             "namespace": namespace,
             "slug":      slug,
         }
-        back_url = reverse("repo_overview", kwargs=kwargs)
+        back_url = reverse("repo_detail", kwargs=kwargs)
 
     return render(request, "repo_listing.html", {
         "namespace":   db_repository.owner.username,
         "slug":        db_repository.slug,
         "path":        path,
-        "commit_hash": commit_hash,
+        "ref": ref,
         "ty":          ty,
         "obj":         o,
         "back_url":    back_url

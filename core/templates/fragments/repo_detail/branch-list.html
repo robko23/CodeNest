@@ -1,0 +1,19 @@
+<div id="branch-list">
+    <h2>Branches</h2>
+    <ul>
+        {% for branch in branches %}
+            {% spaceless %}
+                <li>
+                    <a
+                            href="{% url 'repo_detail' namespace=namespace slug=slug branch_name=branch.name %}"
+                    >
+                        <button>
+                            {{ branch }}
+                        </button>
+                    </a>
+                    {% if branch.name == current_branch.name %}- current{% endif %}
+                </li>
+            {% endspaceless %}
+        {% endfor %}
+    </ul>
+</div>
