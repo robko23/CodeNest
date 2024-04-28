@@ -1,19 +1,64 @@
 <div id="listing">
-    <h2>Listing of /</h2>
-    <ul>
-        {% for dir in dirs %}
-            <li><a
-                    href="{% url 'repo_listing' namespace=namespace slug=slug ref=current_branch.commit.hexsha path=dir.name %}"
-            >
-                [D] {{ dir.name }}
-            </a></li>
-        {% endfor %}
-        {% for file in files %}
-            <li><a
-                    href="{% url 'repo_listing' namespace=namespace slug=slug ref=current_branch.commit.hexsha path=file.name %}"
-            >
-                {{ file.name }}
-            </a></li>
-        {% endfor %}
-    </ul>
+
+    {% if tree %}
+        <h1>Listing of /{{ path }}</h1>
+        <ul>
+            {% if back_url %}
+                <li>
+                    <a href="{{ back_url }}">
+                        [D] ..
+                    </a>
+                </li>
+            {% endif %}
+            {% for dir in tree.dirs %}
+                {% if path == '' %}
+                    <li><a
+                            href="{% url 'repo_detail' namespace=namespace slug=slug ref=current_ref_str path=dir.name %}"
+                    >
+                        [D] {{ dir.name }}
+                    </a></li>
+                {% else %}
+                    {% with path|add:"/"|add:dir.name as dir_path %}
+                        <li><a
+                                href="{% url 'repo_detail' namespace=namespace slug=slug ref=current_ref_str path=dir_path %}"
+                        >
+                            [D] {{ dir.name }}
+                        </a></li>
+                    {% endwith %}
+                {% endif %}
+            {% endfor %}
+            {% for file in tree.files %}
+                {% if path == '' %}
+                    <li><a
+                            href="{% url 'repo_detail' namespace=namespace slug=slug ref=current_ref_str path=file.name %}"
+                    >
+                        {{ file.name }}
+                    </a></li>
+                {% else %}
+                    {% with path|add:"/"|add:file.name as file_path %}
+                        <li><a
+                                href="{% url 'repo_detail' namespace=namespace slug=slug ref=current_ref_str path=file_path %}"
+                        >
+                            {{ file.name }}
+                        </a></li>
+                    {% endwith %}
+                {% endif %}
+            {% endfor %}
+        </ul>
+    {% elif file %}
+        <h1>Contents of /{{ path }}</h1>
+        {% if back_url %}
+            <a href="{{ back_url }}">
+                <button>Back</button>
+            </a>
+        {% endif %}
+        {% load filters %}
+        {% autoescape off %}
+            <pre>
+        {{ file.contents|highlight_code:file.filename }}
+    </pre>
+        {% endautoescape %}
+    {% else %}
+        Invalid state
+    {% endif %}
 </div>

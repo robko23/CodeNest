@@ -5,13 +5,13 @@
             {% spaceless %}
                 <li>
                     <a
-                            href="{% url 'repo_detail' namespace=namespace slug=slug branch_name=branch.name %}"
+                            href="{% url 'repo_detail' namespace=namespace slug=slug ref=branch.name path=path %}"
                     >
                         <button>
                             {{ branch }}
                         </button>
                     </a>
-                    {% if branch.name == current_branch.name %}- current{% endif %}
+                    {% if branch.name == current_ref_str %}- current{% endif %}
                 </li>
             {% endspaceless %}
         {% endfor %}

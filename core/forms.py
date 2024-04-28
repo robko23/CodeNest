@@ -9,6 +9,6 @@ class NewSSHKeyForm(forms.Form):
 
 class NewRepoForm(forms.Form):
     name = forms.CharField(max_length=50)
-    description = forms.CharField(widget=forms.Textarea())
-    slug = forms.SlugField()
+    description = forms.CharField(widget=forms.Textarea(), required=False)
+    slug = forms.SlugField(required=False)
     pass

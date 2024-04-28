@@ -10,6 +10,8 @@ from django.http import Http404
 from django.shortcuts import redirect
 from django.shortcuts import render
 from django.urls import reverse
+from django.utils.text import slugify
+from gitdb.exc import BadObject
 
 from core.forms import NewRepoForm
 from core.forms import NewSSHKeyForm
@@ -53,7 +55,7 @@ def home(request):
 
 
 @login_required
-def repo_detail(request, namespace: str, slug: str, branch_name: str = None):
+def repo_detail(request, namespace: str, slug: str, ref: str = None, path: str = ""):
     try:
         db_repository = Repository.objects.filter(
             slug__exact=slug, owner__username__exact=namespace
@@ -65,113 +67,86 @@ def repo_detail(request, namespace: str, slug: str, branch_name: str = None):
 
     repo_path = get_git_repo_absolute_path(f"{namespace}/{slug}")
     repo = Repo(repo_path)
-    branches = repo.branches
 
-    # select default branch
-    branch: git.Head | None = None
-    if branch_name:
-        for b in branches:
-            if b.name == branch_name:
-                branch = b
-        if not branch:
-            raise Http404(f"Branch {branch_name} does not exist in repo {namespace}/{slug}")
+    branches = repo.branches
+    current_ref_str = ref
+    current_ref: git.types.AnyGitObject
+    if ref:
+        try:
+            current_ref = repo.rev_parse(ref)
+        except (BadObject, ValueError, IndexError):
+            raise Http404(f"Ref {ref} does not exist in repo {namespace}/{slug}")
     else:
+        current_ref = None
         for b in branches:
+            b: git.Head = b
             if b.name in ('main', 'master', 'trunk'):
-                branch = b
-        if not branch:
+                current_ref = b.commit
+                current_ref_str = b.name
+        if not current_ref:
             return render(request, "repo_empty.html", {
                 "namespace": namespace,
                 "slug":      slug
             })
 
-    files: list[git.objects.Blob] = list()
-    dirs: list[git.objects.Tree] = list()
-    for o in branch.commit.tree.traverse(depth=1):
-        if type(o) == git.objects.Tree:
-            dirs.append(o)
-        elif type(o) == git.objects.Blob:
-            files.append(o)
+    if path == '':
+        current_object = current_ref.tree
+    else:
+        try:
+            current_object = current_ref.tree.join(path)
+        except KeyError:
+            raise Http404(f"Path '{path}' does not exist in repo {namespace}/{slug} ref {ref}")
 
-    return render(request, "repo_detail.html", {
-        "namespace":      db_repository.owner.username,
-        "slug":           db_repository.slug,
-        "branches":       branches,
-        "current_branch": branch,
-        "dirs":           dirs,
-        "files":          files
-    })
-
-
-@login_required
-def repo_listing(request, namespace: str, slug: str, ref: str, path: str):
-    try:
-        db_repository = Repository.objects.filter(
-            slug__exact=slug, owner__username__exact=namespace
-        ).get(
-            Q(owner=request.user) | Q(collaborators__in=[request.user])
-        )
-    except Repository.DoesNotExist:
-        raise Http404(f"Repo {namespace}/{slug} does not exist or user does not have permissions")
-
-    repo_path = get_git_repo_absolute_path(f"{namespace}/{slug}")
-    repo = Repo(repo_path)
-    commit = repo.commit(ref)
-    try:
-        obj = commit.tree.join(path)
-    except KeyError:
-        raise Http404(f"Path {path} not found in repo {namespace}/{slug}")
-    ty: str
-    if type(obj) == git.objects.Tree:
-        ty = "dir"
+    tree: dict | None = None
+    file: dict | None = None
+    if isinstance(current_object, git.objects.Tree):
         files: list[git.objects.Blob] = list()
         dirs: list[git.objects.Tree] = list()
-        for o in obj.traverse(depth=1):
-            if type(o) == git.objects.Tree:
+        for o in current_object.traverse(depth=1):
+            if isinstance(o, git.objects.Tree):
                 dirs.append(o)
-            elif type(o) == git.objects.Blob:
+            elif isinstance(o, git.objects.Blob):
                 files.append(o)
-        o = {
-            "files": files,
-            "dirs":  dirs
+        tree = {
+            "dirs":  dirs,
+            "files": files
         }
-    elif type(obj) == git.objects.Blob:
-        ty = "file"
+    elif isinstance(current_object, git.objects.Blob):
         if "/" in path:
             [_, filename] = path.rsplit("/", 1)
         else:
             filename = path
-        o = {
-            "contents": obj.data_stream.read().decode('UTF-8'),
+        file = {
+            "contents": current_object.data_stream.read().decode('UTF-8'),
             "filename": filename
         }
+        pass
+
+    if path == '':
+        back_url = None
     else:
-        ty = "invalid"
-        o = "invalid"
-    if "/" in path:
-        [base, _file] = path.rsplit("/", 1)
-        kwargs = {
-            "namespace":   namespace,
-            "slug":        slug,
-            "ref": ref,
-            "path":        base
-        }
-        back_url = reverse("repo_listing", kwargs=kwargs)
-    else:
+        if "/" in path:
+            [base, _file] = path.rsplit("/", 1)
+        else:
+            base = ""
         kwargs = {
             "namespace": namespace,
             "slug":      slug,
+            "ref":       ref,
+            "path":      base
         }
         back_url = reverse("repo_detail", kwargs=kwargs)
 
-    return render(request, "repo_listing.html", {
-        "namespace":   db_repository.owner.username,
-        "slug":        db_repository.slug,
-        "path":        path,
-        "ref": ref,
-        "ty":          ty,
-        "obj":         o,
-        "back_url":    back_url
+    return render(request, "repo_detail.html", {
+        "namespace":       db_repository.owner.username,
+        "slug":            db_repository.slug,
+        "branches":        branches,
+        "path":            path,
+        "current_ref":     current_ref,
+        "tree":            tree,
+        "file":            file,
+        "current_ref_str": current_ref_str,
+        "back_url":        back_url
     })
 
 
@@ -202,6 +177,8 @@ def new_repo(request: WSGIRequest):
     if request.method == "POST":
         form = NewRepoForm(request.POST)
         if form.is_valid():
+            if not form.cleaned_data["slug"]:
+                form.cleaned_data["slug"] = slugify(form.cleaned_data["name"])
             already_exists = Repository.objects.filter(slug=form.cleaned_data["slug"],
                                                        owner=request.user).exists()
             if already_exists:
