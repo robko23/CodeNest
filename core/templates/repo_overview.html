@@ -12,7 +12,7 @@
         {% spaceless %}
             <li>
                 <a
-                        href="{% url 'repo_overview' namespace=namespace slug=slug branch_name=branch %}"
+                        href="{% url 'repo_overview' namespace=namespace slug=slug branch_name=branch.name %}"
                 >
                     <button>
                         {{ branch }}
