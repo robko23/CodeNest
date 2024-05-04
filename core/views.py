@@ -15,15 +15,36 @@ from gitdb.exc import BadObject
 
 from core.forms import NewRepoForm
 from core.forms import NewSSHKeyForm
+from core.forms import RegisterForm
 from core.models import Repository
 from core.models import SSHKey
 from core.util.git import create_git_repo
 from core.util.git import get_git_repo_absolute_path
 from core.util.ssh import get_pubkey_fingerprint
 
+from django.contrib.auth import login
+
+
 log = logging.getLogger(__name__)
 from git import Repo
 
+
+def register(request): 
+    print("ssTEST")
+    if request.method == "POST":
+        form = RegisterForm(request.POST)
+
+        print("TEST")
+        
+        if form.is_valid():        
+            user = form.save()
+            login(request, user)
+
+            return redirect("home")        
+    else:
+        form = RegisterForm()
+        
+    return render(request, "register.html", {'form': form })
 
 @login_required
 def home(request):
@@ -51,7 +72,6 @@ def home(request):
     return render(request, "home.html", {
         'ssh_keys': ssh_keys,
         'repos':    repos,
-        'user':     request.user
     })
 
 

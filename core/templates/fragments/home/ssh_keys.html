@@ -6,7 +6,7 @@
             <i class="bi bi-plus-circle-fill"></i> New ssh key
         </a>
     </div>
-    <ul class="list-group">
+    <ul class="list-group list-unstyled">
         {% for ssh_key in ssh_keys %}
             <li class="list-group-item d-flex align-items-center justify-content-between">
                 {{ ssh_key.name }} ( {{ ssh_key.fingerprint }} )
@@ -25,6 +25,8 @@
                     </button>
                 </form>
             </li>
+        {% empty %}
+            <li>You have no SSH keys, <a href="{% url 'new_ssh_key' %}">add one!</a></li>
         {% endfor %}
     </ul>
 
