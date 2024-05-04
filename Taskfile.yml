@@ -35,6 +35,10 @@ tasks:
         cmds:
             - docker exec -it code-nest bash
 
+    attach-dev:
+        cmds:
+            - docker exec -it code-nest-dev bash
+
     make-test-keys:
         cmds:
             - ssh-keygen -t rsa -f test-key

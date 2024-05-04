@@ -1,11 +1,23 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Empty repository</title>
-</head>
-<body>
-<h1>Repository {{ namespace }}/{{ slug }} does not contain any objects</h1>
-<p>Use <code>git push</code> to push objects, then you will be able to browse it</p>
-</body>
-</html>
+{% extends "base.html" %}
+
+{% block content %}
+    <h1 class="mb-4">Repository {{ namespace }}/{{ slug }} does not contain any objects</h1>
+
+    <ul class="d-flex flex-column list-unstyled ">
+        <li>
+            To get started add remote
+            <code>
+                git remote add origin git@localhost:{{ namespace }}/{{ slug }}
+            </code>
+        </li>
+        
+        <li>
+            then push using
+            <code>
+                git push origin main        
+            </code>
+        </li>
+
+        <p class="mt-4">You will be able to start browsing then</p>
+    </ul>
+{% endblock content%}

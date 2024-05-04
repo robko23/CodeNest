@@ -51,6 +51,7 @@ def home(request):
     return render(request, "home.html", {
         'ssh_keys': ssh_keys,
         'repos':    repos,
+        'user':     request.user
     })
 
 
@@ -197,3 +198,10 @@ def new_repo(request: WSGIRequest):
     form = NewRepoForm()
     return render(request, "new_repo.html", {"form": form})
     pass
+
+@login_required
+def repo_issues(request: WSGIRequest, namespace: str, slug: str):
+    return render(request, "repo_issues.html", {
+        "namespace": namespace,
+        "slug":      slug
+    })
