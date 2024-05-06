@@ -167,8 +167,39 @@ def repo_detail(request, namespace: str, slug: str, ref: str = None, path: str =
         "tree":            tree,
         "file":            file,
         "current_ref_str": current_ref_str,
-        "back_url":        back_url
+        "back_url":        back_url,
     })
+
+
+def repo_commits(request, namespace, slug, ref):
+    try:
+        db_repository = Repository.objects.filter(
+            slug__exact=slug, owner__username__exact=namespace
+        ).get(
+            Q(owner=request.user) | Q(collaborators__in=[request.user])
+        )
+    except Repository.DoesNotExist:
+        raise Http404(f"Repo {namespace}/{slug} does not exist or user does not have permissions")
+
+    repo_path = get_git_repo_absolute_path(f"{namespace}/{slug}")
+    repo = Repo(repo_path)
+    git_ref = repo.rev_parse(ref)
+
+    commits: list[git.objects.Commit] = list()
+    if isinstance(git_ref, git.objects.Commit):
+        commits.append(git_ref)
+    temp: git.types.Sequence[git.objects.Commit] = git_ref.parents
+    while len(temp) > 0:
+        c = temp[0]
+        commits.append(c)
+        temp = c.parents
+        pass
+    return render(request, "repo_commits.html", {
+        "namespace": namespace,
+        "slug": slug,
+        "commits": commits
+    })
+    pass
 
 
 @login_required

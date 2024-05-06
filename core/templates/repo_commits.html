@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block head %}
+<title>{{ namespace }}/{{ slug  }} - Commits</title>
+{% endblock %}
+{% block content %}
+    {% for commit in commits %}
+        <p>
+            {{ commit.hexsha }} <br/>
+        <pre>
+            {{ commit.message }}<br/>
+            </pre>
+        {{ commit.author.name }} ( {{ commit.author.email }} )<br/>
+        {{ commit.committed_date }}<br/>
+        </p>
+
+    {% endfor %}
+
+{% endblock %}
