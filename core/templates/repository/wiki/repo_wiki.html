@@ -1,0 +1,36 @@
+
+{% extends 'repository/repo_base.html' %}
+
+{% block head %}
+    <title>{{ namespace }}/{{ slug }} - Wiki</title>
+{% endblock %}
+
+{% block repoContent %}
+    <div class="row">
+        <ul class="col-8 list-unstyled">
+            {% for page in pages %}
+                <li id="page-{{ page.id }}">
+                    <h3 class="fw-bold pb-2">{{ page.title }}</h2>
+                    <p style="white-space: pre-wrap;">{{ page.content }}</p>
+                </li>
+            {% endfor %}
+        </ul>
+        <div class="col d-flex flex-column gap-2">
+            <a href="{% url 'new_repo_wiki_page' namespace=namespace slug=slug %}" class="btn btn-success">
+                <i class="bi bi-file-earmark-plus-fill"></i> New page
+            </a>
+            <ul class="list-group sticky-top" style="top: 1rem">
+                <li class="list-group-item">
+                    <p class="fw-bold fs-5 m-0">Pages</p>
+                </li>
+                {% for page in pages %}
+                <li class="list-group-item">
+                    <a href="#page-{{ page.id }}">{{ page.title }}</a>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+
+{% endblock %}

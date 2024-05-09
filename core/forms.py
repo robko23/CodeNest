@@ -50,3 +50,8 @@ class NewIssueForm(forms.Form):
 class NewIssueCommentForm(forms.Form):
     text = StyledCharField(widget=forms.Textarea())
     pass
+
+class NewWikiPageForm(forms.Form):
+    title = StyledCharField(max_length=50)
+    content = StyledCharField(widget=forms.Textarea())
+    pass
