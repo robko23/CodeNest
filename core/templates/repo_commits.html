@@ -1,18 +1,21 @@
-{% extends 'base.html' %}
-{% block head %}
-<title>{{ namespace }}/{{ slug  }} - Commits</title>
-{% endblock %}
-{% block content %}
-    {% for commit in commits %}
-        <p>
-            {{ commit.hexsha }} <br/>
-        <pre>
-            {{ commit.message }}<br/>
-            </pre>
-        {{ commit.author.name }} ( {{ commit.author.email }} )<br/>
-        {{ commit.committed_date }}<br/>
-        </p>
 
-    {% endfor %}
+{% extends 'repo_base.html' %}
+
+{% block head %}
+    <title>{{ namespace }}/{{ slug  }} - Commits</title>
+{% endblock %}
+
+{% block repoContent %}
+    <ul class="list-group">
+        {% for commit in commits %}
+        <li class="list-group-item">
+            <div class="d-flex justify-content-between my-0">
+                <div>By: {{ commit.author.name }} ( {{ commit.author.email }} ) - {{ commit.authored_date }}<div>
+                <p class="text-muted">{{ commit.hexsha }}</p>
+            </div>
+            <div class="mt-0 pt-0"><span class="text-muted">Message:</span> {{ commit.message }}</div>
+        </li>
+        {% endfor %}
+    </ul>
 
 {% endblock %}

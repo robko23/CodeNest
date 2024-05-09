@@ -1,4 +1,5 @@
 # Create your views here.
+from datetime import datetime
 import logging
 import shutil
 
@@ -13,10 +14,10 @@ from django.urls import reverse
 from django.utils.text import slugify
 from gitdb.exc import BadObject
 
-from core.forms import NewRepoForm
+from core.forms import NewIssueCommentForm, NewIssueForm, NewRepoForm
 from core.forms import NewSSHKeyForm
 from core.forms import RegisterForm
-from core.models import Repository
+from core.models import Issue, IssueComment, Repository
 from core.models import SSHKey
 from core.util.git import create_git_repo
 from core.util.git import get_git_repo_absolute_path
@@ -30,12 +31,9 @@ from git import Repo
 
 
 def register(request): 
-    print("ssTEST")
     if request.method == "POST":
         form = RegisterForm(request.POST)
 
-        print("TEST")
-        
         if form.is_valid():        
             user = form.save()
             login(request, user)
@@ -189,15 +187,19 @@ def repo_commits(request, namespace, slug, ref):
     if isinstance(git_ref, git.objects.Commit):
         commits.append(git_ref)
     temp: git.types.Sequence[git.objects.Commit] = git_ref.parents
+
     while len(temp) > 0:
         c = temp[0]
         commits.append(c)
+
+
         temp = c.parents
         pass
     return render(request, "repo_commits.html", {
         "namespace": namespace,
         "slug": slug,
-        "commits": commits
+        "commits": commits,
+        "commits_count": len(commits),
     })
     pass
 
@@ -222,6 +224,19 @@ def new_ssh_key(request: WSGIRequest):
     form = NewSSHKeyForm()
     return render(request, "new_ssh_key.html", {"form": form})
     pass
+
+
+def has_repo_permission(request: WSGIRequest, namespace: str, slug: str) -> bool:
+    try:
+        repository = Repository.objects.filter(
+            slug__exact=slug, owner__username__exact=namespace
+        ).get(
+            Q(owner=request.user) | Q(collaborators__in=[request.user])
+        )
+    except Repository.DoesNotExist:
+        raise Http404(f"Repo {namespace}/{slug} does not exist or user does not have permissions")
+
+    return repository
 
 
 @login_required
@@ -251,8 +266,112 @@ def new_repo(request: WSGIRequest):
     pass
 
 @login_required
-def repo_issues(request: WSGIRequest, namespace: str, slug: str):
-    return render(request, "repo_issues.html", {
+def new_repo_issue(request: WSGIRequest, namespace: str, slug: str):
+    try:
+        repository = Repository.objects.filter(
+            slug__exact=slug, owner__username__exact=namespace
+        ).get(
+            Q(owner=request.user) | Q(collaborators__in=[request.user])
+        )
+    except Repository.DoesNotExist:
+        raise Http404(f"Repo {namespace}/{slug} does not exist or user does not have permissions")
+
+
+    if (request.method == "POST"):
+        form = NewIssueForm(request.POST)
+        if form.is_valid():
+            issue = Issue(title=form.cleaned_data["title"],
+                            description=form.cleaned_data["description"],
+                            repository=repository,
+                            created_by=request.user)
+            issue.save()
+
+            return redirect(reverse("repo_issues", kwargs={"namespace": namespace, "slug": slug}))
+    
+    form = NewIssueForm()
+
+    return render(request, "new_repo_issue.html", {
+        "form": form,
         "namespace": namespace,
         "slug":      slug
     })
+    
+
+@login_required
+def repo_issues(request: WSGIRequest, namespace: str, slug: str):
+    repository = has_repo_permission(request, namespace, slug)
+
+    if (request.method == "POST"):
+        form = NewIssueForm(request.POST)
+        if form.is_valid():
+            issue = Issue(title=form.cleaned_data["title"],
+                          description=form.cleaned_data["description"],
+                          repository=repository,
+                          created_by=request.user)
+            issue.save()
+
+            return redirect(reverse("repo_issues", kwargs={"namespace": namespace, "slug": slug}))
+
+    issues = Issue.objects.filter(repository=repository)
+
+
+    return render(request, "repo_issues.html", {
+        "namespace": namespace,
+        "slug":      slug,
+        "issues":    issues,
+    })
+
+@login_required
+def repo_issue_detail(request: WSGIRequest, namespace: str, slug: str, issue_id: int):
+    repository = has_repo_permission(request, namespace, slug)
+
+    issue = Issue.objects.get(id=issue_id)
+    issue_comments = IssueComment.objects.filter(issue=issue).order_by("created_at")
+
+    comment_form = NewIssueCommentForm()
+
+    return render(request, "repo_issue_detail.html", {
+        "namespace": namespace,
+        "slug":      slug,
+        "issue":     issue,
+        "form":      comment_form,
+        "comments":  issue_comments
+    })
+
+@login_required
+def repo_issue_comment(request: WSGIRequest, namespace: str, slug: str, issue_id: int):
+    repository = has_repo_permission(request, namespace, slug)
+
+    issue = Issue.objects.get(id=issue_id)
+
+    if request.method == "POST":
+        form = NewIssueCommentForm(request.POST)
+        if form.is_valid():
+            comment = IssueComment(text=form.cleaned_data["text"],
+                                   created_by=request.user,
+                                   issue=issue)
+            comment.save()
+
+            return redirect(reverse("repo_issue_detail", kwargs={"namespace": namespace, "slug": slug, "issue_id": issue_id}))
+
+    return render(request, "repo_issue_detail.html", {
+        "namespace": namespace,
+        "slug":      slug,
+        "issue":     issue
+    })
+
+@login_required
+def repo_issue_status(request: WSGIRequest, namespace: str, slug: str, issue_id: int, status: str):
+    if request.method == "POST":
+        repository = has_repo_permission(request, namespace, slug)
+
+        issue = Issue.objects.get(id=issue_id)
+
+        if status == "close":
+            issue.closed_at = datetime.now()
+        if status == "open":
+            issue.closed_at = None
+
+        issue.save()
+
+        return redirect(reverse("repo_issue_detail", kwargs={"namespace": namespace, "slug": slug, "issue_id": issue_id}))

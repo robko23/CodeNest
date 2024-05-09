@@ -1,57 +1,61 @@
 <div id="listing">
 
     {% if tree %}
-        <h1>Listing of /{{ path }}</h1>
-        <ul>
+        <ul class="list-group">
             {% if back_url %}
-                <li>
-                    <a href="{{ back_url }}">
-                        [D] ..
+                <li class="list-group-item">
+                    <a class="text-decoration-none" href="{{ back_url }}">
+                        <i class="bi bi-folder-fill"></i> ..
                     </a>
                 </li>
             {% endif %}
             {% for dir in tree.dirs %}
                 {% if path == '' %}
-                    <li><a
-                            href="{% url 'repo_detail' namespace=namespace slug=slug ref=current_ref_str path=dir.name %}"
-                    >
-                        [D] {{ dir.name }}
-                    </a></li>
+                    <li class="list-group-item">
+                        <a class="text-decoration-none" href="{% url 'repo_detail' namespace=namespace slug=slug ref=current_ref_str path=dir.name %}">
+                            <i class="bi bi-folder-fill"></i> {{ dir.name }}
+                        </a>
+                    </li>
                 {% else %}
                     {% with path|add:"/"|add:dir.name as dir_path %}
-                        <li><a
-                                href="{% url 'repo_detail' namespace=namespace slug=slug ref=current_ref_str path=dir_path %}"
-                        >
-                            [D] {{ dir.name }}
-                        </a></li>
+                        <li class="list-group-item">
+                            <a class="text-decoration-none" href="{% url 'repo_detail' namespace=namespace slug=slug ref=current_ref_str path=dir_path %}">
+                                <i class="bi bi-folder-fill"></i> {{ dir.name }}
+                            </a>
+                        </li>
                     {% endwith %}
                 {% endif %}
             {% endfor %}
             {% for file in tree.files %}
                 {% if path == '' %}
-                    <li><a
-                            href="{% url 'repo_detail' namespace=namespace slug=slug ref=current_ref_str path=file.name %}"
-                    >
-                        {{ file.name }}
-                    </a></li>
+                    <li class="list-group-item">
+                        <a class="text-decoration-none" href="{% url 'repo_detail' namespace=namespace slug=slug ref=current_ref_str path=file.name %}">
+                            <i class="bi bi-file-earmark-fill"></i> {{ file.name }}
+                        </a>
+                    </li>
                 {% else %}
                     {% with path|add:"/"|add:file.name as file_path %}
-                        <li><a
-                                href="{% url 'repo_detail' namespace=namespace slug=slug ref=current_ref_str path=file_path %}"
-                        >
-                            {{ file.name }}
-                        </a></li>
+                        <li class="list-group-item">
+                            <a class="text-decoration-none" href="{% url 'repo_detail' namespace=namespace slug=slug ref=current_ref_str path=file_path %}">
+                                <i class="bi bi-file-earmark-fill"></i> {{ file.name }}
+                            </a>
+                        </li>
                     {% endwith %}
                 {% endif %}
             {% endfor %}
         </ul>
     {% elif file %}
-        <h1>Contents of /{{ path }}</h1>
         {% if back_url %}
-            <a href="{{ back_url }}">
-                <button>Back</button>
-            </a>
-        {% endif %}
+            <ul class="list-group">
+                <li class="list-group-item">
+                    <a href="{{ back_url }}" class="text-decoration-none ">
+                        <button class="btn p-0 d-inline-flex align-items-center">
+                            <i class="bi bi-arrow-bar-up fs-5" ></i> Back
+                        </button>
+                    </a>
+                </li>
+            </ul>
+            {% endif %}
         {% load filters %}
         {% autoescape off %}
             <pre>

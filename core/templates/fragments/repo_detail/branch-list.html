@@ -1,19 +1,21 @@
 <div id="branch-list">
-    <h2>Branches</h2>
-    <ul>
-        {% for branch in branches %}
-            {% spaceless %}
-                <li>
-                    <a
-                            href="{% url 'repo_detail' namespace=namespace slug=slug ref=branch.name path=path %}"
-                    >
-                        <button>
+    <div class="dropdown">
+        <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="bi bi-git"></i> {{ current_ref_str }}
+        </button>
+        <ul class="dropdown-menu">
+            {% for branch in branches %}
+                {% spaceless %}
+                    <li class="dropdown-item">
+                        <a
+                                href="{% url 'repo_detail' namespace=namespace slug=slug ref=branch.name path=path %}"
+                        >
                             {{ branch }}
-                        </button>
-                    </a>
-                    {% if branch.name == current_ref_str %}- current{% endif %}
-                </li>
-            {% endspaceless %}
-        {% endfor %}
-    </ul>
+                        {% if branch.name == current_ref_str %}- current{% endif %}
+                        </a>
+                    </li>
+                {% endspaceless %}
+            {% endfor %}
+        </ul>
+      </div>
 </div>

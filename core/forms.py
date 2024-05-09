@@ -48,4 +48,5 @@ class NewIssueForm(forms.Form):
     pass
 
 class NewIssueCommentForm(forms.Form):
+    text = StyledCharField(widget=forms.Textarea())
     pass

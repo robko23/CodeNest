@@ -1,0 +1,32 @@
+
+{% extends 'repo_base.html' %}
+
+{% block head %}
+    <title>{{ namespace }}/{{ slug }} - Issues</title>
+{% endblock %}
+
+{% block repoContent %}
+    <ul class="list-group">
+        {% for issue in issues %}
+        <li class="list-group-item">
+            <div class="d-flex align-items-start gap-1">
+                <a href="{% url 'repo_issue_detail' namespace=namespace slug=slug issue_id=issue.id %}">
+                    <h3 class="fs-6 fw-bold">#{{ issue.id}} {{ issue.title }} </h3>
+                </a>
+                
+                {% if issue.closed_at == None %}
+                    <div class="badge text-light bg-success">
+                        Open
+                    </div>
+                {% else %}
+                    <div class="badge text-bg-danger">
+                        Closed
+                    </div>
+                {% endif %}
+            </div>
+            <span class="text-truncate text-muted">{{ issue.description }}</span>
+        </li>
+        {% endfor %}
+    </ul>
+
+{% endblock %}

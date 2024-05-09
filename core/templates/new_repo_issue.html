@@ -1,0 +1,24 @@
+{% extends "repo_base.html" %}
+
+{% block repoContent %}
+    <div class="container">
+        <h2 class="fw-bold pb-2">New issue</h2>
+
+        <form action="{% url 'new_repo_issue' %}" method="post">
+            {% if slug_invalid %}
+                <p class="text-danger">Slug invalid</p>
+            {% endif %}
+            {% csrf_token %}
+        
+            <div class="d-flex flex-column gap-2">
+                {% for field in form %}
+                    <div>
+                        <label class="form-label" for="{{ field.auto_id }}">{{ field.label }}</label>
+                        {{ field }}
+                    </div>
+                {% endfor %}
+            </div>
+            <input class="btn btn-success w-100 my-3" type="submit" value="Submit issue">
+        </form>
+    </div>
+{% endblock %}
