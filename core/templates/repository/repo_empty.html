@@ -1,5 +1,9 @@
 {% extends "base.html" %}
 
+{% block head %}
+    <title>{{ namespace }}/{{ slug }} | CodeNest</title>
+{% endblock %}
+
 {% block content %}
     <h1 class="mb-4">Repository {{ namespace }}/{{ slug }} does not contain any objects</h1>
 

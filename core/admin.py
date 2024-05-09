@@ -30,15 +30,3 @@ class IssueCommentAdmin(admin.ModelAdmin):
 class WikiPageAdmin(admin.ModelAdmin):
     list_display = ("repository", "title", "created_at", "created_by")
     pass
-
-
-@admin.register(models.Snippet)
-class SnippetAdmin(admin.ModelAdmin):
-    list_display = ("owner", "title", "created_at")
-    pass
-
-
-@admin.register(models.SnippetFile)
-class SnippetFileAdmin(admin.ModelAdmin):
-    list_display = ("snippet", "name", "created_at")
-    pass

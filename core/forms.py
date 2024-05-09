@@ -55,3 +55,4 @@ class NewWikiPageForm(forms.Form):
     title = StyledCharField(max_length=50)
     content = StyledCharField(widget=forms.Textarea())
     pass
+

@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block head %}
-    <title>{{ namespace }}/{{ slug }}</title>
+    <title>{{ namespace }}/{{ slug }} | CodeNest</title>
 {% endblock %}
 
 {% block content %}
@@ -17,25 +17,26 @@
           </a>
         {% endif %}
       </div>
+      {{ request.path.inc }}
       <div class="card-body p-0 pt-4">
         <ul class="nav nav-tabs px-4" id="repo-nav-tab" role="tablist">
           <li class="nav-item" role="presentation">
             <a class="text-decoration-none" href="{% url 'repo_detail' namespace=namespace slug=slug %}">
-              <button class="nav-link active" data-bs-toggle="tab" type="button" role="tab" aria-selected="true">
+              <button class="nav-link {% if 'repo_detail' in request.resolver_match.url_name %} active {% endif %}" data-bs-toggle="tab" type="button" role="tab" aria-selected="true">
                 <i class="bi bi-braces"></i> Code
               </button>
             </a>
           </li>
           <li class="nav-item" role="presentation">
             <a href="{% url 'repo_issues' namespace=namespace slug=slug %}" class="text-decoration-none">
-              <button class="nav-link" data-bs-toggle="tab" type="button" role="tab" ria-selected="false">
+              <button class="nav-link {% if 'repo_issue' in request.resolver_match.url_name %} active {% endif %}" data-bs-toggle="tab" type="button" role="tab" ria-selected="false">
                 <i class="bi bi-cone"></i> Issues
               </button>
             </a>
           </li>
           <li class="nav-item" role="presentation">
             <a href="{% url 'repo_wiki' namespace=namespace slug=slug %}" class="text-decoration-none">
-              <button class="nav-link" data-bs-toggle="tab" type="button" role="tab" ria-selected="false">
+              <button class="nav-link {% if 'repo_wiki' in request.resolver_match.url_name %} active {% endif %}" data-bs-toggle="tab" type="button" role="tab" ria-selected="false">
                 <i class="bi bi-book-half"></i> Wiki
               </button>
             </a>

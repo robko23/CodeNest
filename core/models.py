@@ -55,24 +55,6 @@ class WikiPage(models.Model):
     def __str__(self):
         return self.title
 
-class Snippet(models.Model):
-    owner = models.ForeignKey(User, on_delete=models.CASCADE)
-    title = models.CharField(max_length=50, null=False, blank=False)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        return self.title
-    
-class SnippetFile(models.Model):
-    snippet = models.ForeignKey(Snippet, on_delete=models.CASCADE)
-    name = models.CharField(max_length=50, null=False, blank=False)
-    content = models.CharField(max_length=512, null=False, blank=False)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        return self.name
 
 # this needs to be at the bottom of the file, because it would create circular import error.
 # we need to import this to register the signals
