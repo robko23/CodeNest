@@ -1,0 +1,9 @@
+{% extends 'repository/repo_base.html' %}
+
+{% block repoContent %}  
+  {% include 'fragments/repo_detail/branch-list.html' %}
+
+  <p class="text-muted pt-2">~/{{ path }}</p>
+
+  {% include 'fragments/repo_detail/listing.html' %}
+{% endblock %}

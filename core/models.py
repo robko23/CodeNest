@@ -21,6 +21,39 @@ class SSHKey(models.Model):
 
     def __str__(self):
         return self.fingerprint
+    
+class Issue(models.Model):
+    repository = models.ForeignKey(Repository, on_delete=models.CASCADE)
+    title = models.CharField(max_length=50, null=False, blank=False)
+    description = models.CharField(max_length=512, null=False, blank=False)
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    closed_at = models.DateTimeField(null=True, blank=True)
+
+    def __str__(self):
+        return self.title
+    
+class IssueComment(models.Model):
+    issue = models.ForeignKey(Issue, on_delete=models.CASCADE)
+    text = models.CharField(max_length=512, null=False, blank=False)
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.text
+    
+class WikiPage(models.Model):
+    repository = models.ForeignKey(Repository, on_delete=models.CASCADE)
+    title = models.CharField(max_length=50, null=False, blank=False)
+    content = models.CharField(max_length=512, null=False, blank=False)
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.title
 
 
 # this needs to be at the bottom of the file, because it would create circular import error.

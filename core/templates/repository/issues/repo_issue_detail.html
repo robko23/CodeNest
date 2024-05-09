@@ -1,0 +1,87 @@
+
+{% extends 'repository/repo_base.html' %}
+
+{% block head %}
+    <title>{{ namespace }}/{{ slug }} - Issue #{{ issue.id }} | CodeNest</title>
+{% endblock %}
+
+{% block repoContent %}
+    <div class="d-flex justify-content-between">
+        <h3>
+            #{{ issue.id }} {{ issue.title }}
+            {% if issue.closed_at == None %}
+                <div class="badge text-light bg-success">
+                    Open
+                </div>
+            {% else %}
+                <div class="badge text-bg-danger">
+                    Closed
+                </div>
+            {% endif %}
+        </h3>
+        {% if issue.closed_at == None %}
+            <form action="{% url 'repo_issue_status' namespace=namespace slug=slug issue_id=issue.id status='close' %}" method="POST">
+                {% csrf_token %}
+
+                <button type="submit" class="btn btn-danger">
+                    <i class="bi bi-check-circle"></i> Close
+                </button>
+            </form>
+        {% else %}
+            <form action="{% url 'repo_issue_status' namespace=namespace slug=slug issue_id=issue.id status='open' %}" method="POST">
+                {% csrf_token %}
+
+                <button type="submit" class="btn btn-success">
+                    <i class="bi bi-folder2-open"></i> Reopen
+                </button>
+            </form>
+        {% endif %}
+    </div>
+    <p class="text-muted">{{ issue.created_by }} opened this issue {{ issue.created_at|timesince }} ago</p>
+
+    <ul class="p-0">
+        <li class="d-flex align-items-end gap-2">
+            <i class="bi bi-person-circle fs-3"></i>
+            <div class="card w-100">
+                <div class="card-body"> 
+                    <div class="card-title d-flex justify-content-between">
+                        <h3 class="fs-5">
+                            {{issue.created_by}}
+                        </h3>
+                    </div>
+                    {{ issue.description }}
+                </div>
+            </div>
+        </li>
+    </ul>
+
+    <ul class="d-flex flex-column gap-2 p-0">
+        {% for comment in comments %}
+            <li class="d-flex align-items-end gap-2">
+                <div class="card w-100">
+                    <div class="card-body"> 
+                        <div class="card-title d-flex justify-content-between ">
+                            <h3 class="fs-5">{{ comment.created_by }}</h3>
+                            <div class="badge text-bg-secondary d-flex align-items-center">{{ comment.created_at|date:"d.m.Y H:i" }}</div>
+                        </div>
+                        {{ comment.text }}
+                    </div>
+                </div>
+                <i class="bi bi-person-circle fs-3"></i>
+            </li>
+        {% endfor %}
+    </ul>
+
+    
+    <form action="{% url 'repo_issue_comment' namespace=namespace slug=slug issue_id=issue.id %}" method="post">
+        {% csrf_token %}
+
+        <input type="hidden" name="issue_id" value="{{ issue.id }}">
+
+        
+        <label for="text"><i class="bi bi-chat-dots"></i> Comment</label>
+        <textarea class="form-control" name="text" id="text" cols="30" rows="2"></textarea>
+        <input class="btn btn-success my-3" type="submit" value="Post comment">
+    </form>
+
+{% endblock %}

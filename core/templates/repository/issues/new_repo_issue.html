@@ -1,14 +1,14 @@
-{% extends "base.html" %}
+{% extends "repository/repo_base.html" %}
 
 {% block head %}
-    <title>New repository | CodeNest</title>
+    <title>{{ namespace }}/{{ slug }} - New issue | CodeNest</title>
 {% endblock %}
 
-{% block content %}
+{% block repoContent %}
     <div class="container">
-        <h2 class="fw-bold pb-2">New repository</h2>
+        <h2 class="fw-bold pb-2">New issue</h2>
 
-        <form action="{% url 'new_repo' %}" method="post">
+        <form action="{% url 'new_repo_issue' %}" method="post">
             {% if slug_invalid %}
                 <p class="text-danger">Slug invalid</p>
             {% endif %}
@@ -22,7 +22,7 @@
                     </div>
                 {% endfor %}
             </div>
-            <input class="btn btn-success w-100 my-3" type="submit" value="Create repository">
+            <input class="btn btn-success w-100 my-3" type="submit" value="Submit issue">
         </form>
     </div>
 {% endblock %}

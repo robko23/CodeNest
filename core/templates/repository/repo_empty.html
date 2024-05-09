@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block head %}
+    <title>{{ namespace }}/{{ slug }} | CodeNest</title>
+{% endblock %}
+
+{% block content %}
+    <h1 class="mb-4">Repository {{ namespace }}/{{ slug }} does not contain any objects</h1>
+
+    <ul class="d-flex flex-column list-unstyled ">
+        <li>
+            To get started add remote
+            <code>
+                git remote add origin git@localhost:{{ namespace }}/{{ slug }}
+            </code>
+        </li>
+        
+        <li>
+            then push using
+            <code>
+                git push origin main        
+            </code>
+        </li>
+
+        <p class="mt-4">You will be able to start browsing then</p>
+    </ul>
+{% endblock content%}

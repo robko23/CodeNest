@@ -1,26 +1,37 @@
 <div id="repo-list">
-    <h1>Repos</h1>
-    {% for repo in repos %}
-        <div style="display: flex; flex-direction: row; gap: 1em">
-            <a href="{% url 'repo_detail' namespace=repo.owner.username slug=repo.slug %}">
-                {{ repo.name }}
-            </a>
-            <form
+    <div class="d-flex align-items-center justify-content-between pb-2">
+        <h2><i class="bi bi-archive-fill"></i> Repositories</h2>
+
+        <a class="btn btn-success" href="{% url 'new_repo' %}">
+            <i class="bi bi-plus-circle-fill"></i> New repository
+        </a>
+    </div>
+    <ul class="list-group list-unstyled">
+        {% for repo in repos %}
+            <li class="list-group-item d-flex align-items-center justify-content-between">
+                <a class="fs-5" href="{% url 'repo_detail' namespace=repo.owner.username slug=repo.slug %}">
+                    {{ repo.name }}
+                </a>
+                <form
                     hx-post="{% url 'home' %}"
                     hx-target="#repo-list"
                     hx-swap="outerHTML"
-                    hx-confirm="Do you really want to remove repository {{ repo.owner.username }}/{{ repo.slug }}?">
-                {% csrf_token %}
-                <input type="hidden" name="action" value="delete"/>
-                <input type="hidden" name="object" value="repository"/>
-                <input type="hidden" name="target"
-                       value="{{ repo.slug }}"/>
-                <button type="submit">Delete</button>
-            </form>
-        </div>
-    {% endfor %}
+                    hx-confirm="Do you really want to remove repository {{ repo.owner.username }}/{{ repo.slug }}?"
+                >
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="delete"/>
+                    <input type="hidden" name="object" value="repository"/>
+                    <input type="hidden" name="target"
+                        value="{{ repo.slug }}"/>
+                    <button class="btn btn-danger" type="submit">
+                        <i class="bi bi-trash3-fill"></i>
+                    </button>
+                </form>
+            </li>
+        {% empty %}
+            <li>You have no repositories, <a href="{% url 'new_repo' %}">create one!</a></li>
+        {% endfor %}
+    </ul>
 
-    <a href="{% url 'new_repo' %}">
-        <button>Add repo</button>
-    </a>
+
 </div>

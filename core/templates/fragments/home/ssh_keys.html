@@ -1,23 +1,33 @@
 <div id="ssh-keys-list">
-    <h1>SSH key</h1>
-    {% for ssh_key in ssh_keys %}
-        <div style="display: flex; flex-direction: row; gap: 1em">
-            {{ ssh_key.name }} ( {{ ssh_key.fingerprint }} )
-            <form
-                    hx-post="{% url 'home' %}"
-                    hx-target="#ssh-keys-list"
-                    hx-swap="outerHTML"
-                    hx-confirm="Do you really want to remove ssh key {{ ssh_key.name }}?">
-                {% csrf_token %}
-                <input type="hidden" name="action" value="delete"/>
-                <input type="hidden" name="object" value="ssh_key"/>
-                <input type="hidden" name="target"
-                       value="{{ ssh_key.pk }}"/>
-                <button type="submit">Delete</button>
-            </form>
-        </div>
-    {% endfor %}
-    <a href="{% url 'new_ssh_key' %}">
-        <button>Add ssh key</button>
-    </a>
+    <div class="d-flex align-items-center justify-content-between pb-2">
+        <h2><i class="bi bi-key-fill"></i> SSH keys</h2>
+
+        <a class="btn btn-success" href="{% url 'new_ssh_key' %}">
+            <i class="bi bi-plus-circle-fill"></i> New ssh key
+        </a>
+    </div>
+    <ul class="list-group list-unstyled">
+        {% for ssh_key in ssh_keys %}
+            <li class="list-group-item d-flex align-items-center justify-content-between">
+                {{ ssh_key.name }} ( {{ ssh_key.fingerprint }} )
+                <form
+                        hx-post="{% url 'home' %}"
+                        hx-target="#ssh-keys-list"
+                        hx-swap="outerHTML"
+                        hx-confirm="Do you really want to remove ssh key {{ ssh_key.name }}?">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="delete"/>
+                    <input type="hidden" name="object" value="ssh_key"/>
+                    <input type="hidden" name="target"
+                        value="{{ ssh_key.pk }}"/>
+                    <button class="btn btn-danger" type="submit">
+                        <i class="bi bi-trash3-fill"></i>
+                    </button>
+                </form>
+            </li>
+        {% empty %}
+            <li>You have no SSH keys, <a href="{% url 'new_ssh_key' %}">add one!</a></li>
+        {% endfor %}
+    </ul>
+
 </div>
