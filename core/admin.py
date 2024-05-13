@@ -20,6 +20,7 @@ class IssueAdmin(admin.ModelAdmin):
     list_display = ("repository", "title", "created_by", "created_at")
     pass
 
+
 @admin.register(models.IssueComment)
 class IssueCommentAdmin(admin.ModelAdmin):
     list_display = ("issue", "text", "created_by", "created_at")
